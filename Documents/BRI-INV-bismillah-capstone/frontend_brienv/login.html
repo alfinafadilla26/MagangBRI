@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BRI INV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #2196F3; /* Example blue, adjust if needed */
+            --dark-blue: #1976D2; /* Darker blue for hover */
+            --text-color: #333;
+            --white: #fff;
+            --input-border: #ccc;
+            --input-focus-border: #888;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            overflow: hidden; /* Prevent scrollbar from the background design */
+        }
+
+        .login-container {
+            display: flex;
+            width: 90%;
+            max-width: 1000px; /* Max width of the overall container */
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            min-height: 550px; /* Minimum height for the container */
+        }
+
+        .login-left {
+            flex: 1;
+            background-color: var(--white);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .login-logo {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.2em;
+            color: var(--text-color);
+        }
+
+        .login-logo img {
+            height: 30px; /* Adjust as needed */
+            margin-right: 10px;
+        }
+
+        .login-left h2 {
+            font-size: 2.2em;
+            color: var(--text-color);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box; /* Include padding in width */
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: var(--dark-blue);
+        }
+
+        .login-right {
+            flex: 1;
+            background-color: var(--primary-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-right-logo {
+            width: 60%; /* Adjust size of the large icon */
+            height: auto;
+            max-width: 300px; /* Max size for the large icon */
+            filter: grayscale(100%) brightness(200%) contrast(0%) invert(1); /* Simulate the silver/grey look */
+            opacity: 0.2; /* Adjust opacity as seen in the image */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                width: 95%;
+                min-height: auto; /* Allow height to adjust */
+            }
+
+            .login-left, .login-right {
+                flex: none; /* Disable flex-grow */
+                width: 100%;
+                padding: 30px;
+            }
+
+            .login-left {
+                order: 2; /* Put left section below right on small screens */
+            }
+
+            .login-right {
+                order: 1; /* Put right section above left on small screens */
+                min-height: 250px; /* Give some height to the right section */
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
+            .login-logo {
+                position: static; /* Remove absolute positioning */
+                margin-bottom: 20px;
+            }
+
+            .login-left h2 {
+                font-size: 1.8em;
+                margin-top: 0;
+            }
+
+            .login-right-logo {
+                width: 40%;
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-left, .login-right {
+                padding: 20px;
+            }
+
+            .login-left h2 {
+                font-size: 1.5em;
+            }
+
+            .form-group input, .login-button {
+                padding: 10px;
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="login-logo">
+                <img src="https://i.imgur.com/your-bri-inv-logo.png" alt="BRI INV Logo"> <span>BRI INV</span>
+            </div>
+            <h2>Masuk</h2>
+            <form>
+                <div class="form-group">
+                    <label for="personalNumber">Personal Number</label>
+                    <input type="text" id="personalNumber" name="personalNumber" placeholder="Masukkan Personal Number Anda" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Masukkan Password Anda" required>
+                </div>
+                <button type="submit" class="login-button">Masuk</button>
+            </form>
+        </div>
+        <div class="login-right">
+            <svg class="login-right-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7V17L12 22L22 17V7L12 2ZM12 4.472L20 8.878V15.122L12 19.528L4 15.122V8.878L12 4.472ZM12 9.5L7 12V14.5L12 17L17 14.5V12L12 9.5ZM12 11.5L14.5 13L12 14.5L9.5 13L12 11.5Z" fill="#FFFFFF"/>
+                <path d="M12 0L10.395 5.505L5 6.09L8.85 9.705L7.795 15L12 12.015L16.205 15L15.15 9.705L19 6.09L13.605 5.505L12 0Z" fill="#FFFFFF" transform="translate(0, -5) scale(0.3) translate(10, 0)"/>
+                 </svg>
+        </div>
+    </div>
+</body>
+</html>

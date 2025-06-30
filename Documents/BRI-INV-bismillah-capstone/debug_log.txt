@@ -1,0 +1,7 @@
+2025-06-30 15:25:35,068 - WARNING - Gambar 'garis_dashboard.png' tidak ditemukan: [Errno 2] No such file or directory: 'C:\\Users\\Alfina\\Documents\\BRI-INV-bismillah-capstone\\assets\\icons\\garis_dashboard.png'
+2025-06-30 15:25:35,074 - WARNING - Ikon langkah 'Icon.png' tidak ditemukan: [Errno 2] No such file or directory: 'C:\\Users\\Alfina\\Documents\\BRI-INV-bismillah-capstone\\assets\\icons\\Icon.png'
+2025-06-30 15:25:35,081 - WARNING - Ikon langkah 'logo_tengah.png' tidak ditemukan: [Errno 2] No such file or directory: 'C:\\Users\\Alfina\\Documents\\BRI-INV-bismillah-capstone\\assets\\icons\\logo_tengah.png'
+2025-06-30 15:25:35,091 - WARNING - Ikon langkah 'Icon_kanan.png' tidak ditemukan: [Errno 2] No such file or directory: 'C:\\Users\\Alfina\\Documents\\BRI-INV-bismillah-capstone\\assets\\icons\\Icon_kanan.png'
+2025-06-30 15:25:42,550 - WARNING - Gambar logo 'logo_E.png' tidak ditemukan: [Errno 2] No such file or directory: 'C:\\Users\\Alfina\\Documents\\BRI-INV-bismillah-capstone\\assets\\logo_E.png'
+2025-06-30 15:25:50,940 - WARNING - Password salah untuk user: admin123
+2025-06-30 15:25:55,000 - INFO - Login berhasil untuk user: admin123
