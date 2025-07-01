@@ -79,7 +79,7 @@ def create_tables():
         cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id INT AUTO_INCREMENT PRIMARY KEY, nama VARCHAR(255) NOT NULL, personal_number VARCHAR(255) UNIQUE NOT NULL, password TEXT NOT NULL, role VARCHAR(50) NOT NULL DEFAULT 'superadmin') ENGINE=InnoDB;")
         cursor.execute("CREATE TABLE IF NOT EXISTS categories (category_id INT AUTO_INCREMENT PRIMARY KEY, category_name VARCHAR(255) UNIQUE NOT NULL) ENGINE=InnoDB;")
         cursor.execute("CREATE TABLE IF NOT EXISTS items (item_id INT AUTO_INCREMENT PRIMARY KEY, item_name VARCHAR(255) NOT NULL, description TEXT, stock INT NOT NULL DEFAULT 0, date_added DATETIME NOT NULL, category_id INT, image_url VARCHAR(255), FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL) ENGINE=InnoDB;")
-        # --- PERBAIKAN: Menambahkan kolom item_name_snapshot ---
+        # Menambahkan kolom item_name_snapshot untuk menyimpan nama barang saat transaksi
         cursor.execute("CREATE TABLE IF NOT EXISTS history_log (log_id INT AUTO_INCREMENT PRIMARY KEY, item_id INT, item_name_snapshot VARCHAR(255), taker_name VARCHAR(255) NOT NULL, quantity_taken INT NOT NULL, date_taken DATETIME NOT NULL, transaction_type VARCHAR(50) NOT NULL DEFAULT 'keluar', FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE SET NULL) ENGINE=InnoDB;")
         logging.info("Pengecekan dan pembuatan tabel selesai.")
         conn.commit()
@@ -89,7 +89,6 @@ def create_tables():
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-
 
 def setup_default_admin():
     """Membuat user admin default jika belum ada user sama sekali."""
@@ -215,8 +214,6 @@ def add_item(name, desc, stock, cat_id, image_url=None):
         query = "INSERT INTO items (item_name, description, stock, date_added, category_id, image_url) VALUES (%s, %s, %s, %s, %s, %s)"
         cursor.execute(query, (name, desc, stock, date, cat_id, image_url))
         new_item_id = cursor.lastrowid
-        # --- PERBAIKAN: Urutan parameter disesuaikan ---
-        # (item_id, item_name, quantity, user_name, transaction_type, conn)
         record_transaction(new_item_id, name, stock, "Admin", "masuk", conn)
         conn.commit()
     except Error as e:
@@ -248,19 +245,12 @@ def delete_item(item_id):
         conn = create_connection()
         if not (conn and conn.is_connected()): return
         cursor = conn.cursor()
-        
-        # Dapatkan detail item SEBELUM dihapus
         cursor.execute("SELECT item_name, stock FROM items WHERE item_id = %s", (item_id,))
         item_details = cursor.fetchone()
-        
         if item_details:
             item_name, stock = item_details
-            # --- PERBAIKAN: Mencatat nama barang sebelum dihapus ---
             record_transaction(item_id, item_name, stock, "Admin", "dihapus", conn)
-        
-        # Hapus item dari tabel items
         cursor.execute("DELETE FROM items WHERE item_id = %s", (item_id,))
-        
         conn.commit()
     except Error as e:
         if conn: conn.rollback()
@@ -284,7 +274,6 @@ def take_item(item_id, quantity, taker_name):
             if current_stock >= quantity:
                 new_stock = current_stock - quantity
                 cursor.execute("UPDATE items SET stock = %s WHERE item_id = %s", (new_stock, item_id))
-                # --- PERBAIKAN: Mengirim nama item saat mencatat transaksi ---
                 record_transaction(item_id, item_name, quantity, taker_name, "keluar", conn)
                 conn.commit()
                 success = True
@@ -298,7 +287,10 @@ def take_item(item_id, quantity, taker_name):
     return success
     
 def adjust_stock(item_id, quantity, transaction_type):
-    """Menambah atau mengurangi stok item dan mencatat transaksi."""
+    """
+    Menambah atau mengurangi stok item dan mencatat transaksi.
+    transaction_type bisa 'masuk' atau 'keluar'.
+    """
     conn = None
     try:
         conn = create_connection()
@@ -324,7 +316,6 @@ def adjust_stock(item_id, quantity, transaction_type):
             raise ValueError("Tipe transaksi tidak valid.")
             
         cursor.execute("UPDATE items SET stock = %s WHERE item_id = %s", (new_stock, item_id))
-        # --- PERBAIKAN: Mengirim nama item saat mencatat transaksi ---
         record_transaction(item_id, item_name, quantity, "Admin", transaction_type, conn)
         conn.commit()
         
@@ -338,26 +329,6 @@ def adjust_stock(item_id, quantity, transaction_type):
             cursor.close()
             conn.close()
 
-# --- FUNGSI BARU UNTUK MENGECEK ITEM ---
-def find_item_by_name(item_name):
-    """Mencari item berdasarkan nama yang sama persis (case-insensitive)."""
-    conn = None
-    try:
-        conn = create_connection()
-        if not (conn and conn.is_connected()): return None
-        cursor = conn.cursor(dictionary=True)
-        # Menggunakan LOWER() untuk membuat pencarian case-insensitive
-        query = "SELECT item_id, stock FROM items WHERE LOWER(item_name) = LOWER(%s)"
-        cursor.execute(query, (item_name,))
-        return cursor.fetchone()
-    except Error as e:
-        logging.error(f"Error finding item by name: {e}")
-        return None
-    finally:
-        if conn and conn.is_connected():
-            cursor.close()
-            conn.close()
-
 # --- Fungsi untuk Riwayat (History) ---
 
 def record_transaction(item_id, item_name, quantity, user_name, transaction_type, existing_conn=None):
@@ -366,15 +337,11 @@ def record_transaction(item_id, item_name, quantity, user_name, transaction_type
     try:
         conn = existing_conn or create_connection()
         if not (conn and conn.is_connected()): raise Exception("Koneksi DB Gagal")
-        
         cursor = conn.cursor()
         date_taken = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # --- PERBAIKAN: Menyimpan item_name_snapshot ---
         query = "INSERT INTO history_log (item_id, item_name_snapshot, quantity_taken, taker_name, date_taken, transaction_type) VALUES (%s, %s, %s, %s, %s, %s)"
         cursor.execute(query, (item_id, item_name, quantity, user_name, date_taken, transaction_type))
-        
-        if not existing_conn:
-            conn.commit()
+        if not existing_conn: conn.commit()
     except Error as e:
         if conn and not existing_conn: conn.rollback()
         logging.error(f"Error recording transaction: {e}")
@@ -391,7 +358,6 @@ def get_history():
         conn = create_connection()
         if not (conn and conn.is_connected()): return []
         cursor = conn.cursor()
-        # --- PERBAIKAN: Mengambil nama dari history_log, bukan join ---
         query = "SELECT date_taken, item_name_snapshot, quantity_taken, taker_name, transaction_type FROM history_log ORDER BY log_id DESC"
         cursor.execute(query)
         return cursor.fetchall()
@@ -409,7 +375,6 @@ def get_history_by_date_range(start_date, end_date):
         conn = create_connection()
         if not (conn and conn.is_connected()): return []
         cursor = conn.cursor()
-        # --- PERBAIKAN: Mengambil nama dari history_log, bukan join ---
         query = "SELECT date_taken, item_name_snapshot, quantity_taken, taker_name, transaction_type FROM history_log WHERE date_taken BETWEEN %s AND %s ORDER BY log_id DESC"
         cursor.execute(query, (start_date, end_date_inclusive))
         return cursor.fetchall()
@@ -434,6 +399,24 @@ def get_item_by_id(item_id):
         return None
     finally:
         if conn and conn.is_connected(): cursor.close(); conn.close()
+
+def find_item_by_name(item_name):
+    """Mencari item berdasarkan nama yang sama persis (case-insensitive)."""
+    conn = None
+    try:
+        conn = create_connection()
+        if not (conn and conn.is_connected()): return None
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT item_id, stock FROM items WHERE LOWER(item_name) = LOWER(%s)"
+        cursor.execute(query, (item_name,))
+        return cursor.fetchone()
+    except Error as e:
+        logging.error(f"Error finding item by name: {e}")
+        return None
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
 def search_items(category_id=None, keyword=""):
     conn = None
@@ -464,6 +447,7 @@ def get_items_by_category(category_id):
         conn = create_connection()
         if not (conn and conn.is_connected()): return []
         cursor = conn.cursor()
+        # Mengembalikan 8 kolom agar cocok dengan `management_frame.py`
         query = "SELECT i.item_id, i.item_name, c.category_name, i.stock, i.description, i.date_added, i.image_url, i.category_id FROM items i LEFT JOIN categories c ON i.category_id = c.category_id WHERE i.category_id = %s ORDER BY i.item_name"
         cursor.execute(query, (category_id,))
         return cursor.fetchall()
@@ -490,6 +474,25 @@ def get_category_name_by_item_id(item_id):
         return "Error"
     finally:
         if conn and conn.is_connected(): cursor.close(); conn.close()
+
+# --- FUNGSI BARU UNTUK NOTIFIKASI ---
+def get_low_stock_items(threshold=5):
+    """Mengambil semua item yang stoknya di bawah atau sama dengan threshold."""
+    conn = None
+    try:
+        conn = create_connection()
+        if not (conn and conn.is_connected()): return []
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT item_id, item_name, stock FROM items WHERE stock <= %s ORDER BY stock ASC"
+        cursor.execute(query, (threshold,))
+        return cursor.fetchall()
+    except Error as e:
+        logging.error(f"Error getting low stock items: {e}")
+        return []
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
 # --- Main Execution Block ---
 if __name__ == '__main__':

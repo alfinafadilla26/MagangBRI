@@ -48,19 +48,35 @@ class DashboardFrame(customtkinter.CTkFrame):
         text_container = customtkinter.CTkFrame(banner_frame, fg_color="transparent")
         text_container.grid(row=0, column=0, padx=50, pady=50, sticky="nsew")
         
+        try:
+        # Muat gambar Vector.png
+            vector_image = customtkinter.CTkImage(
+            light_image=Image.open(self.get_asset_path("Vector.png")),
+            dark_image=Image.open(self.get_asset_path("Vector.png")),
+            size=(250, 250)  # Ukuran bisa disesuaikan
+            )
+        # Jadikan text_container sebagai master dan gunakan .place()
+            vector_label = customtkinter.CTkLabel(text_container, image=vector_image, text="")
+        # Tempatkan di pojok kiri atas text_container, sesuaikan x/y agar pas
+            vector_label.place(x=-35, y=-50)
+        except Exception as e:
+            logging.warning(f"Gambar 'Vector.png' tidak ditemukan: {e}")
+
         customtkinter.CTkLabel(text_container, text="Transparasi Stok,\nTerpusat, Terkendali", font=customtkinter.CTkFont(family="Inter", size=38, weight="bold"), text_color="white", justify="left").pack(anchor="w", pady=(0,5))
         customtkinter.CTkLabel(text_container, text="Dengan Gudang Digital, Barang Tidak Akan Kehabisan!", font=customtkinter.CTkFont(family="Inter", size=16), text_color="#E0E7FF", justify="left").pack(anchor="w", pady=(0, 30))
         
-        explore_button = customtkinter.CTkButton(text_container, text="Eksplor Sekarang!", font=customtkinter.CTkFont(family="Inter", size=16, weight="bold"), 
-                                                 fg_color="#FFFFFF", text_color="#297AB9", hover_color="#F5F3FF", 
-                                                 height=50, width=220, corner_radius=12, command=self.explore_callback,
-                                                 border_width=2, border_color="#FFFFFF")
-        explore_button.pack(anchor="w")
+        explore_button = customtkinter.CTkButton(text_container, text="Eksplor Sekarang!", 
+                                           font=customtkinter.CTkFont(family="Inter", size=16, weight="bold"), 
+                                           fg_color="#FFFFFF", text_color="#297AB9", hover_color="#F5F3FF", 
+                                           height=50, width=220, corner_radius=12, 
+                                           border_width=2, border_color="#FFFFFF")
+    # Menambahkan pady=(30, 0) untuk memberikan jarak 30 piksel dari atas
+        explore_button.pack(anchor="w", pady=(30, 0))
 
         image_container = customtkinter.CTkFrame(banner_frame, fg_color="transparent")
-        image_container.grid(row=0, column=1, sticky="nsew", padx=(0, 30), pady=30)
+        image_container.grid(row=0, column=1, sticky="nsew", padx=(0, 50), pady=30)
         try:
-            phone_image = customtkinter.CTkImage(Image.open(self.get_asset_path("phone_dashboard.png")), size=(260, 260))
+            phone_image = customtkinter.CTkImage(Image.open(self.get_asset_path("phone_dashboard.png")), size=(350, 350))
             customtkinter.CTkLabel(image_container, image=phone_image, text="").pack(anchor="center", expand=True)
         except Exception as e:
             logging.warning(f"Gambar banner 'phone_dashboard' tidak ditemukan: {e}")
